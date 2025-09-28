@@ -71,8 +71,4 @@ The goal of this project is to automatically detect and classify whether motorcy
 **Miftahur Rizki**
 Data Science Undergraduate | Telkom University
 
-Visit my website: [https://miftahurrizki.vervel.app]((https://miftahurrizki.vercel.app/))
-
----
-
-Mau gw bikinin versi **academic style** yang serius (kaya skripsi) atau **casual style** (lebih gampang dibaca orang di GitHub, kaya proyek open source)?
+Visit my website: [https://miftahurrizki.vervel.app](https://miftahurrizki.vercel.app/)
