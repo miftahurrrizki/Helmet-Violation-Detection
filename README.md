@@ -2,7 +2,7 @@
 
 ## 🌐 Live Demo & Slides  
 - 🔗 [Try the Web App](https://your-website-link.com) – Upload an image and see detection results in real-time.  
-- 🎞️ [View Presentation Slides]([https://www.canva.com/your-canva-slide-link](https://www.canva.com/design/DAGwkFGjdl8/hmHpOYOtcLz0ney9ajUBWg/edit?utm_content=DAGwkFGjdl8&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)) – Overview of the project, methodology, and results.  
+- 🎞️ [View Presentation Slides](https://www.canva.com/your-canva-slide-link](https://www.canva.com/design/DAGwkFGjdl8/hmHpOYOtcLz0ney9ajUBWg/edit?utm_content=DAGwkFGjdl8&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)) – Overview of the project, methodology, and results.  
 
 ---
 
