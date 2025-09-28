@@ -32,7 +32,7 @@ The goal of this project is to automatically detect and classify whether motorcy
 
 ## ⚙️ Methodology  
 1. **Data Collection & Annotation**  
-   - Images annotated using [Roboflow/LabelImg/etc.].  
+   - Images annotated using Roboflow.  
    - Stored in YOLO format (txt files with class and bounding box coordinates).  
 
 2. **Model Training**  
@@ -70,7 +70,8 @@ The goal of this project is to automatically detect and classify whether motorcy
 
 **Miftahur Rizki**
 Data Science Undergraduate | Telkom University
-📧 [your email] | 🔗 [LinkedIn/GitHub profile]
+
+Visit my website: [https://miftahurrizki.vervel.app]((https://miftahurrizki.vercel.app/))
 
 ---
 
