@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelmGuard AI - Helmet Violation Detection (Dark Mode)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Using Inter as the default font */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Main background for dark theme */
+            background-color: #0F172A;
+            /* Default text color for dark theme */
+            color: #E2E8F0;
+        }
+
+        /* Gradient for header text, looks better on a dark background */
+        .brand-gradient-text {
+            background: linear-gradient(to right, #3B82F6, #A78BFA, #F472B6, #FBBF24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        /* Styling for the drag-and-drop area */
+        .drop-zone {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            background-color: #3B82F6;
+            border-color: #60A5FA;
+        }
+
+        /* Modern spinner animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #334155;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        .loader::after {
+            content: '';
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-bottom-color: #3B82F6;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Transition for elements appearing/disappearing */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.5s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-slate-300">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="text-center mb-8 md:mb-12">
+            <div class="flex justify-center items-center gap-3 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-blue-500">
+                    <path d="M21 8.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2.5"></path>
+                    <path d="m21 14-4-4v8l4-4Z"></path>
+                </svg>
+                <h1 class="text-4xl md:text-5xl font-bold text-slate-100">Helmet Violation Detector</h1>
+            </div>
+            <p class="text-lg text-slate-400 max-w-2xl mx-auto">
+                Analyze CCTV footage to automatically detect helmet violations using AI.
+            </p>
+        </header>
+
+        <main class="flex-grow">
+            <!-- Upload Zone -->
+            <div id="uploadZone" class="w-full">
+                <form id="uploadForm">
+                    <input type="file" id="imageUpload" class="hidden" accept="image/*">
+                    <label for="imageUpload"
+                        class="drop-zone flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-700 rounded-2xl cursor-pointer bg-slate-800/50 hover:bg-slate-800 hover:border-blue-500">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-10 h-10 mb-4 text-slate-500" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                            </svg>
+                            <p class="mb-2 text-sm text-slate-400"><span class="font-semibold">Click to upload</span>
+                                or drag and drop</p>
+                            <p class="text-xs text-slate-500">PNG, JPG, or JPEG (MAX. 10MB)</p>
+                        </div>
+                    </label>
+                </form>
+                <p id="fileName" class="text-slate-500 mt-3 text-center"></p>
+            </div>
+
+            <!-- Results Container -->
+            <div id="results" class="hidden fade-enter-from">
+                <!-- Loading View -->
+                <div id="loader" class="text-center hidden p-8">
+                    <div class="loader mx-auto"></div>
+                    <p class="mt-4 text-slate-400 font-semibold">Analyzing image...</p>
+                </div>
+
+                <!-- Result Content View -->
+                <div id="resultContent" class="hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                        <!-- Original Image -->
+                        <div
+                            class="bg-slate-800 p-4 rounded-2xl ring-1 ring-slate-700 transition-all hover:ring-blue-500">
+                            <h3 class="text-xl font-semibold mb-3 text-center text-slate-200">Original Image</h3>
+                            <img id="originalImage" src="#" alt="Original Image"
+                                class="w-full h-auto rounded-lg object-contain max-h-[60vh]">
+                        </div>
+                        <!-- Detection Result -->
+                        <div
+                            class="bg-slate-800 p-4 rounded-2xl ring-1 ring-slate-700 transition-all hover:ring-blue-500">
+                            <h3 class="text-xl font-semibold mb-3 text-center text-slate-200">Detection Result</h3>
+                            <img id="annotatedImage" src="#" alt="Detection Result"
+                                class="w-full h-auto rounded-lg object-contain max-h-[60vh]">
+                        </div>
+                    </div>
+
+                    <!-- Statistics Summary -->
+                    <div id="stats" class="bg-slate-800 mt-8 p-6 rounded-2xl ring-1 ring-slate-700">
+                        <h3 class="text-2xl font-semibold mb-4 text-center text-slate-100">Detection Summary</h3>
+                        <div id="statsContent" class="text-lg"></div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error" class="bg-red-900/50 border-l-4 border-red-500 text-red-300 p-4 rounded-lg mt-8 hidden"
+                    role="alert">
+                    <p class="font-bold">An Error Occurred</p>
+                    <p id="errorMessage">Could not process your request at this time.</p>
+                </div>
+
+                <!-- Re-analyze Button -->
+                <div class="text-center mt-8">
+                    <button id="resetButton"
+                        class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all transform hover:scale-105">
+                        Analyze Another Image
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center py-6 mt-12 border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <!-- Link to Project Documentation -->
+                <a href="https://github.com/miftahurrrizki/helmet-violation-detection" target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                        </path>
+                    </svg>
+                    <span>View Project Documentation on GitHub</span>
+                </a>
+                <p class="text-slate-500 text-sm">Designed by<a href="https://miftahurrizki.vercel.app" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-blue-400 transition-colors"> Miftahur Rizki</a> with ❤️</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- DOM Element References ---
+        const uploadZone = document.getElementById('uploadZone');
+        const dropZone = document.querySelector('.drop-zone');
+        const imageUpload = document.getElementById('imageUpload');
+        const fileNameDisplay = document.getElementById('fileName');
+        const resultsDiv = document.getElementById('results');
+        const loader = document.getElementById('loader');
+        const resultContent = document.getElementById('resultContent');
+        const originalImage = document.getElementById('originalImage');
+        const annotatedImage = document.getElementById('annotatedImage');
+        const statsDiv = document.getElementById('stats');
+        const statsContent = document.getElementById('statsContent');
+        const errorDiv = document.getElementById('error');
+        const errorMessage = document.getElementById('errorMessage');
+        const resetButton = document.getElementById('resetButton');
+
+        // --- Configuration ---
+        // Replace with your Hugging Face Space URL
+        const apiUrl = 'https://miftahurrrizki-helmet-violation-detection.hf.space/detect/';
+
+        // --- Core Functions ---
+
+        /**
+         * Handles the selected or dropped file for processing.
+         * @param {File} file - The image file to be analyzed.
+         */
+        const handleFile = async (file) => {
+            if (!file || !file.type.startsWith('image/')) {
+                // Use displayError for a more consistent message
+                displayError('Please select an image file (PNG, JPG, JPEG).');
+                // Hide loader if an error occurs early
+                loader.classList.add('hidden');
+                resultsDiv.classList.add('hidden');
+                uploadZone.classList.remove('hidden');
+                return;
+            }
+
+            // 1. Update UI to loading state
+            uploadZone.classList.add('hidden');
+            resultsDiv.classList.remove('hidden', 'fade-enter-from');
+            resultsDiv.classList.add('fade-enter-active');
+            loader.classList.remove('hidden');
+            resultContent.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            fileNameDisplay.textContent = `Processing: ${file.name}`;
+
+            // Display the original image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // 2. Prepare and send request to the API
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(`Server responded with status ${response.status}: ${errorData}`);
+                }
+
+                const data = await response.json();
+
+                // 3. Display results on success
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                displayError(`Failed to communicate with the server. Details: ${error.message}`);
+            } finally {
+                // 4. Hide loader when done
+                loader.classList.add('hidden');
+            }
+        };
+
+        /**
+         * Renders the result data from the API to the UI.
+         * @param {object} data - The response object from the API.
+         */
+        const displayResults = (data) => {
+            annotatedImage.src = `data:image/jpeg;base64,${data.annotated_image}`;
+
+            const withHelmet = data.with_helmet;
+            const withoutHelmet = data.without_helmet;
+            const totalRiders = withHelmet + withoutHelmet;
+
+            let statsHTML = '';
+            if (totalRiders === 0) {
+                statsHTML = '<p class="text-center text-slate-400">No motorcycle riders were detected in the image.</p>';
+            } else {
+                const complianceRate = totalRiders > 0 ? (withHelmet / totalRiders) * 100 : 0;
+                statsHTML = `
+                    <div class="flex flex-col md:flex-row justify-center items-center md:space-x-12 space-y-6 md:space-y-0">
+                        <div class="text-center">
+                            <p class="text-5xl font-bold text-green-500">${withHelmet}</p>
+                            <p class="text-slate-400">With Helmet</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-5xl font-bold text-red-500">${withoutHelmet}</p>
+                            <p class="text-slate-400">Without Helmet</p>
+                        </div>
+                        <div class="text-center pt-4 md:pt-0 md:border-l md:pl-12 border-slate-700">
+                             <p class="text-5xl font-bold text-blue-500">${complianceRate.toFixed(1)}%</p>
+                             <p class="text-slate-400">Compliance Rate</p>
+                        </div>
+                    </div>
+                `;
+            }
+            statsContent.innerHTML = statsHTML;
+
+            resultContent.classList.remove('hidden');
+        };
+
+        /**
+         * Displays an error message in the UI.
+         * @param {string} message - The error message to display.
+         */
+        const displayError = (message) => {
+            errorMessage.textContent = message;
+            errorDiv.classList.remove('hidden');
+            // Ensure result content is hidden if an error occurs
+            resultContent.classList.add('hidden');
+        };
+
+        /**
+         * Resets the UI to its initial state.
+         */
+        const resetUI = () => {
+            uploadZone.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            resultsDiv.classList.remove('fade-enter-active');
+            resultsDiv.classList.add('fade-enter-from');
+            fileNameDisplay.textContent = '';
+            imageUpload.value = ''; // Reset the file input
+        };
+
+        // --- Event Listeners ---
+
+        // Listener for the file input
+        imageUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        // Listeners for drag-and-drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        // Listener for the reset button
+        resetButton.addEventListener('click', resetUI);
+
+    </script>
+</body>
+
+</html>
